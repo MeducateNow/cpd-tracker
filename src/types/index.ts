@@ -1,45 +1,58 @@
 export interface User {
   id: string;
-  created_at: string;
   email: string;
   full_name: string;
-  profession?: string;
-  license_number?: string;
-  avatar_url?: string;
+  profession: string;
+  license_number: string;
   total_cpd_points: number;
   required_annual_points: number;
+  created_at: string;
+}
+
+export interface CPDActivity {
+  id: string;
+  user_id: string;
+  title: string;
+  description: string;
+  activity_type: string;
+  provider: string;
+  points: number;
+  date_completed: string;
+  certificate_url?: string;
+  created_at: string;
 }
 
 export interface Webinar {
   id: string;
-  created_at: string;
   title: string;
   description: string;
-  presenter: string;
+  provider: string;
+  points: number;
   date: string;
   duration_minutes: number;
-  cpd_points: number;
-  accreditation_body: string;
-  category: string;
+  registration_url: string;
   image_url?: string;
-}
-
-export interface UserWebinar {
-  id: string;
-  user_id: string;
-  webinar_id: string;
-  completed_at?: string;
-  certificate_url?: string;
-  feedback?: string;
-  status: 'registered' | 'in_progress' | 'completed';
-  webinar?: Webinar;
+  is_accredited: boolean;
+  accreditation_body?: string;
 }
 
 export interface AccreditationBody {
   id: string;
   name: string;
+  description: string;
   website_url: string;
   logo_url?: string;
-  submission_url: string;
-  description: string;
+  country: string;
+}
+
+export interface Certificate {
+  id: string;
+  user_id: string;
+  activity_id: string;
+  title: string;
+  issue_date: string;
+  expiry_date?: string;
+  certificate_number: string;
+  file_url: string;
+  created_at: string;
 }

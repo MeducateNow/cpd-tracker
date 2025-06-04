@@ -9,9 +9,22 @@ interface AuthContextType {
   signUp: (email: string, password: string, userData: Partial<User>) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  useDefaultUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Default user for testing when authentication fails
+const DEFAULT_USER: User = {
+  id: 'default-user-id',
+  email: 'default@example.com',
+  full_name: 'Default User',
+  profession: 'Doctor',
+  license_number: 'TEST-12345',
+  total_cpd_points: 25,
+  required_annual_points: 50,
+  created_at: new Date().toISOString(),
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -77,6 +90,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Function to use the default user for testing
+  const useDefaultUser = () => {
+    setUser(DEFAULT_USER);
+  };
+
   const signIn = async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -134,6 +152,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
+      // If using default user, just clear the user state
+      if (user?.id === DEFAULT_USER.id) {
+        setUser(null);
+        return;
+      }
+      
+      // Otherwise, perform actual sign out
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
     } catch (error) {
@@ -144,6 +169,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (updates: Partial<User>) => {
     if (!user) throw new Error('No user logged in');
+    
+    // If using default user, just update the local state
+    if (user.id === DEFAULT_USER.id) {
+      setUser({ ...user, ...updates });
+      return;
+    }
     
     try {
       const { error } = await supabase
@@ -161,7 +192,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, updateProfile }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      signIn, 
+      signUp, 
+      signOut, 
+      updateProfile,
+      useDefaultUser 
+    }}>
       {children}
     </AuthContext.Provider>
   );
